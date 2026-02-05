@@ -1,0 +1,118 @@
+# Stock Watchlist - Auto-generated from Portfolio Data
+# Source: C:\Users\rohitkundu\OneDrive - Microsoft\Documents\Trade\Data
+# Generated: 2026-01-31
+
+# === LARGE CAP - CORE HOLDINGS ===
+RELIANCE.NS
+HDFCBANK.NS
+INFY.NS
+TCS.NS
+ICICIBANK.NS
+KOTAKBANK.NS
+HINDUNILVR.NS
+ITC.NS
+LT.NS
+BAJFINANCE.NS
+
+# === TATA GROUP ===
+# TATAMOTORS.NS - Yahoo Finance issue, temporarily unavailable
+TATAPOWER.NS
+TATACONSUM.NS
+TATASTEEL.NS
+TATACHEM.NS
+
+# === PSU / GOVERNMENT ===
+COALINDIA.NS
+POWERGRID.NS
+PFC.NS
+RECLTD.NS
+IRFC.NS
+NHPC.NS
+IOC.NS
+NMDC.NS
+NATIONALUM.NS
+HAL.NS
+BEL.NS
+IRCTC.NS
+
+# === MIDCAP GROWTH ===
+TRENT.NS
+ETERNAL.NS
+VBL.NS
+VOLTAS.NS
+VEDL.NS
+DEEPAKNTR.NS
+KPITTECH.NS
+MOTHERSON.NS
+AFFLE.NS
+IEX.NS
+INDUSINDBK.NS
+LTIM.NS
+
+# === PHARMA ===
+LUPIN.NS
+CIPLA.NS
+
+# === FMCG ===
+NESTLEIND.NS
+
+# === US STOCKS ===
+AAPL
+MSFT
+GOOGL
+NVDA
+AMZN
+
+# ============================================================
+# PORTFOLIO RETROSPECTIVE ANALYSIS - 2026-01-31
+# Using Zerodha Varsity 7-Point Checklist Framework
+# ============================================================
+
+# === CURRENT HOLDINGS - LOSERS (REVIEW/EXIT) ===
+# These stocks violated multiple checklist criteria
+
+# CRITICAL - EXIT CANDIDATES (>50% loss, broken stocks)
+ALLCARGO.NS    # -85% | Violations: Prior Trend, S&R, Dow Theory, No Stoploss
+# MISHTANN (BSE) # -78% | Penny stock, illiquid, EXIT IMMEDIATELY
+TRACXN.NS      # -64% | IPO FOMO buy, no S&R history, bought at highs
+INFIBEAM.NS    # -51% | Multi-year downtrend, catching falling knife
+
+# MODERATE LOSERS (20-50% loss, set stoploss)
+# NCC (BSE)      # -46% | Bought at resistance/highs, momentum chase
+DOLATALGO.NS   # -36% | Small-cap, unreliable volume
+# TMPV (BSE)     # -34% | Tata Motors DVR, sector weakness
+KHAICHEM.NS    # -22% | Small-cap chemical, no clear S&R
+MMTC.NS        # -20% | PSU hype buy, sector rotation risk
+
+# === CURRENT HOLDINGS - WINNERS (HOLD/TRAIL STOPLOSS) ===
+IREDA.NS       # +146% | Strong sector, hold with trailing SL
+# GOLDBEES.NS    # +103% | Gold ETF, systematic allocation - HOLD
+ZENTEC.NS      # +58% | Quality mid-cap, trail stoploss
+TATASTEEL.NS   # +19% | Quality, primary uptrend intact
+BHEL.NS        # +35% | PSU recovery play, trail SL
+INTERARCH.NS   # +24% | Quality small-cap, monitor closely
+
+# === MISTAKES IDENTIFIED ===
+# 1. NO STOPLOSS DISCIPLINE - Holding -85% losers
+# 2. CATCHING FALLING KNIVES - ALLCARGO, INFIBEAM, MISHTANN
+# 3. FOMO AT HIGHS - NCC, TRACXN, MMTC
+# 4. PENNY STOCK TRADING - MISHTANN (violates volume rule)
+# 5. NO RRR CALCULATION - Unlimited downside entries
+
+# === PRE-TRADE CHECKLIST (MANDATORY) ===
+# [ ] Recognizable candlestick pattern?
+# [ ] Prior trend supports trade direction?
+# [ ] S&R within 4% of stoploss?
+# [ ] Volume >= 10-day average?
+# [ ] RRR >= 1.5?
+# [ ] RSI/MACD confirmation?
+# [ ] Trading WITH primary trend (Dow Theory)?
+# --> If ANY unchecked = SKIP THE TRADE
+
+# === ACTION ITEMS ===
+# 1. EXIT: MISHTANN immediately (penny stock, -78%)
+# 2. SET STOPLOSS: All losing positions
+# 3. REVIEW: ALLCARGO, INFIBEAM - fundamentally broken?
+# 4. TRAIL SL: On winners (IREDA, ZENTEC, TATASTEEL)
+# 5. FUTURE: Only trade when ALL 7 criteria pass
+

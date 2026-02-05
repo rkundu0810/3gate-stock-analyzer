@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Stock Analysis{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted mb-1">Watchlist</h6>
+                        <h3 id="watchlist-count" class="mb-0">--</h3>
+                    </div>
+                    <div class="fs-1 text-primary opacity-50"><i class="bi bi-bookmark-star"></i></div>
+                </div>
+                <small class="text-muted">Stocks tracked</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted mb-1">Paper Capital</h6>
+                        <h3 id="portfolio-capital" class="mb-0">--</h3>
+                    </div>
+                    <div class="fs-1 text-success opacity-50"><i class="bi bi-wallet2"></i></div>
+                </div>
+                <small class="text-muted" id="positions-count">-- positions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted mb-1">Analysis Reports</h6>
+                        <h3 id="reports-count" class="mb-0">--</h3>
+                    </div>
+                    <div class="fs-1 text-info opacity-50"><i class="bi bi-file-earmark-bar-graph"></i></div>
+                </div>
+                <small class="text-muted">Reports saved</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted mb-1">Zerodha</h6>
+                        <h3 id="kite-status-text" class="mb-0 text-muted">--</h3>
+                    </div>
+                    <div class="fs-1 text-warning opacity-50"><i class="bi bi-plug"></i></div>
+                </div>
+                <small class="text-muted" id="kite-detail">Check settings</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Quick Analyze -->
+    <div class="col-lg-4">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header"><i class="bi bi-lightning-charge me-2"></i>Quick Analyze</div>
+            <div class="card-body">
+                <form id="quick-analyze-form" class="d-flex gap-2">
+                    <input type="text" id="quick-symbol" class="form-control" placeholder="e.g. RELIANCE.NS" autocomplete="off">
+                    <button type="submit" class="btn btn-primary text-nowrap"><i class="bi bi-search"></i> Go</button>
+                </form>
+                <div id="quick-result" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div class="card bg-dark border-secondary mt-3">
+            <div class="card-header"><i class="bi bi-clock-history me-2"></i>Recent Reports</div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush" id="recent-reports">
+                    <div class="list-group-item bg-dark text-muted text-center">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Analysis Results -->
+    <div class="col-lg-8">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-table me-2"></i>Latest Analysis Summary</span>
+                <a href="/watchlist" class="btn btn-sm btn-outline-primary">Run Full Analysis</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Price</th>
+                                <th>Fund</th>
+                                <th>Value</th>
+                                <th>Tech</th>
+                                <th>Verdict</th>
+                            </tr>
+                        </thead>
+                        <tbody id="latest-results">
+                            <tr><td colspan="6" class="text-center text-muted">No recent analysis. Use Quick Analyze or run Watchlist analysis.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Load summary data
+    apiCall('/api/watchlist').then(d => {
+        if (d) document.getElementById('watchlist-count').textContent = d.count;
+    });
+    apiCall('/api/portfolio/summary').then(d => {
+        if (d) {
+            document.getElementById('portfolio-capital').textContent = formatINR(d.capital);
+            document.getElementById('positions-count').textContent = d.holdings_count + ' positions';
+        }
+    });
+    apiCall('/api/kite/status').then(d => {
+        if (d) {
+            document.getElementById('kite-status-text').textContent = d.connected ? 'Connected' : (d.configured ? 'Disconnected' : 'Not Setup');
+            document.getElementById('kite-status-text').className = 'mb-0 ' + (d.connected ? 'text-success' : 'text-warning');
+            document.getElementById('kite-detail').textContent = d.connected ? 'Live data active' : 'Go to Settings';
+        }
+    });
+    apiCall('/api/history?limit=5').then(d => {
+        if (d && d.files.length) {
+            document.getElementById('reports-count').textContent = d.files.length;
+            const list = document.getElementById('recent-reports');
+            list.innerHTML = d.files.map(f => `
+                <a href="/history?file=${f.filename}" class="list-group-item list-group-item-action bg-dark text-light border-secondary">
+                    <div class="d-flex justify-content-between">
+                        <small>${f.filename}</small>
+                        <small class="text-muted">${f.date}</small>
+                    </div>
+                </a>`).join('');
+        }
+    });
+
+    // Quick analyze form
+    document.getElementById('quick-analyze-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const sym = document.getElementById('quick-symbol').value.trim();
+        if (sym) window.location.href = '/analyze?symbol=' + encodeURIComponent(sym);
+    });
+});
+</script>
+{% endblock %}

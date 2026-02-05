@@ -1,0 +1,19 @@
+# 3-Gate Stock Analysis System - Dependencies
+
+# Core analysis
+yfinance>=0.2.0
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# Web application
+flask>=3.0.0
+waitress>=3.0.0
+
+# Scheduler & notifications
+schedule>=1.2.0
+win10toast>=0.9  # Optional: Windows notifications
+
+# Trading Bot - Zerodha Kite Connect
+kiteconnect>=4.0.0  # Official Zerodha API client

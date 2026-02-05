@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% block title %}Analyze Stock{% endblock %}
+{% block content %}
+<div class="row justify-content-center mb-4">
+    <div class="col-lg-8">
+        <div class="card bg-dark border-secondary">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-search me-2"></i>3-Gate Stock Analysis</h5>
+                <form id="analyze-form" class="d-flex gap-2">
+                    <input type="text" id="symbol-input" class="form-control form-control-lg" placeholder="Enter stock symbol (e.g. RELIANCE.NS, LUPIN.NS, AAPL)" value="{{ symbol }}" autocomplete="off">
+                    <button type="submit" class="btn btn-primary btn-lg text-nowrap" id="analyze-btn">
+                        <i class="bi bi-lightning-charge"></i> Analyze
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress -->
+<div id="progress-section" class="d-none">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+            <div class="spinner-border text-primary mb-3" role="status"></div>
+            <h5 id="progress-text">Analyzing...</h5>
+            <p class="text-muted">Fetching data from Screener.in + yfinance + technical indicators</p>
+        </div>
+    </div>
+</div>
+
+<!-- Results -->
+<div id="results-section" class="d-none">
+    <!-- Verdict Banner -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div id="verdict-banner" class="card">
+                <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <h3 class="mb-0">
+                            <span id="result-symbol" class="me-2"></span>
+                            <span id="verdict-badge" class="badge"></span>
+                        </h3>
+                        <p class="mb-0 mt-1 text-muted" id="result-meta"></p>
+                    </div>
+                    <div class="text-end">
+                        <h4 id="result-price" class="mb-0"></h4>
+                        <small class="text-muted" id="result-confidence"></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3 Gate Cards -->
+    <div class="row g-3 mb-3">
+        <!-- Gate 1: Fundamental -->
+        <div class="col-md-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header d-flex justify-content-between">
+                    <span><i class="bi bi-building me-1"></i>Gate 1: Fundamental</span>
+                    <span id="g1-badge" class="badge"></span>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="score-circle" id="g1-score">--</div>
+                        <small class="text-muted">Quality Score</small>
+                    </div>
+                    <div id="g1-checklist" class="checklist-items"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gate 2: Valuation -->
+        <div class="col-md-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header d-flex justify-content-between">
+                    <span><i class="bi bi-calculator me-1"></i>Gate 2: Valuation</span>
+                    <span id="g2-badge" class="badge"></span>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span id="g2-verdict-badge" class="badge fs-5 px-3 py-2"></span>
+                    </div>
+                    <div id="g2-details" class="small"></div>
+                    <hr class="border-secondary">
+                    <div id="g2-key-metrics" class="small text-muted"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gate 3: Technical -->
+        <div class="col-md-4">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header d-flex justify-content-between">
+                    <span><i class="bi bi-graph-up me-1"></i>Gate 3: Technical</span>
+                    <span id="g3-badge" class="badge"></span>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="score-circle" id="g3-score">--</div>
+                        <small class="text-muted">TA Score</small>
+                    </div>
+                    <div id="g3-checklist" class="checklist-items"></div>
+                    <hr class="border-secondary">
+                    <div id="g3-price-data" class="small text-muted"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Red Flags + Trade Setup -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="card bg-dark border-secondary h-100">
+                <div class="card-header"><i class="bi bi-exclamation-triangle me-1"></i>Red Flags</div>
+                <div class="card-body" id="red-flags-body"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-dark border-secondary h-100" id="trade-setup-card">
+                <div class="card-header"><i class="bi bi-bullseye me-1"></i>Trade Setup</div>
+                <div class="card-body" id="trade-setup-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body">
+                    <h6><i class="bi bi-signpost-split me-2"></i>Action Plan</h6>
+                    <p id="action-text" class="mb-0 fs-5"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error -->
+<div id="error-section" class="d-none">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle me-2"></i><span id="error-text"></span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('analyze-form');
+    const input = document.getElementById('symbol-input');
+    const btn = document.getElementById('analyze-btn');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const symbol = input.value.trim().toUpperCase();
+        if (!symbol) return;
+
+        hide('results-section'); hide('error-section');
+        show('progress-section');
+        btn.disabled = true;
+        document.getElementById('progress-text').textContent = `Analyzing ${symbol}...`;
+
+        const data = await apiCall('/api/analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({symbol})
+        });
+        if (!data || !data.task_id) {
+            hide('progress-section');
+            btn.disabled = false;
+            return;
+        }
+        pollAnalysis(data.task_id);
+    });
+
+    async function pollAnalysis(taskId) {
+        const poll = async () => {
+            const data = await apiCall(`/api/analyze/${taskId}`);
+            if (!data) { hide('progress-section'); btn.disabled = false; return; }
+            if (data.status === 'running') {
+                setTimeout(poll, 2000);
+            } else if (data.status === 'complete') {
+                hide('progress-section');
+                btn.disabled = false;
+                renderResults(data.result);
+                show('results-section');
+            } else {
+                hide('progress-section');
+                btn.disabled = false;
+                document.getElementById('error-text').textContent = data.error || 'Analysis failed';
+                show('error-section');
+            }
+        };
+        poll();
+    }
+
+    function renderResults(r) {
+        if (!r) return;
+        const v = r.verdict || {};
+        const f = r.fundamentals || {};
+        const fr = r.fund_result || {};
+        const vr = r.val_result || {};
+        const cl = r.checklist_result || {};
+        const rf = r.red_flags || {};
+        const ma = r.moving_averages || {};
+        const sr = r.support_resistance || {};
+
+        // Verdict banner
+        document.getElementById('result-symbol').textContent = r.symbol;
+        const vb = document.getElementById('verdict-badge');
+        vb.textContent = v.verdict;
+        vb.className = 'badge ' + verdictColor(v.verdict);
+        document.getElementById('result-price').textContent = '₹' + (ma.current_price || '--');
+        document.getElementById('result-meta').textContent = `${f.industry || 'Unknown'} | ${(f.data_source || 'yfinance')}`;
+        document.getElementById('result-confidence').textContent = 'Confidence: ' + (v.confidence || '--');
+        document.getElementById('verdict-banner').className = 'card ' + verdictBorder(v.verdict);
+
+        // Gate 1: Fundamental
+        const g1 = fr.gate_pass;
+        document.getElementById('g1-badge').textContent = g1 ? 'PASS' : (g1 === false ? 'FAIL' : 'N/A');
+        document.getElementById('g1-badge').className = 'badge ' + (g1 ? 'bg-success' : 'bg-danger');
+        document.getElementById('g1-score').textContent = `${fr.score || 0}/${fr.assessed || 0}`;
+        document.getElementById('g1-score').className = 'score-circle ' + (g1 ? 'score-pass' : 'score-fail');
+        const g1cl = fr.checklist || {};
+        document.getElementById('g1-checklist').innerHTML = Object.entries(g1cl).map(([k, item]) => {
+            const icon = item.pass === true ? '<i class="bi bi-check-circle-fill text-success"></i>'
+                       : item.pass === false ? '<i class="bi bi-x-circle-fill text-danger"></i>'
+                       : '<i class="bi bi-dash-circle text-muted"></i>';
+            return `<div class="d-flex gap-2 mb-1">${icon} <small>${item.detail}</small></div>`;
+        }).join('');
+
+        // Gate 2: Valuation
+        const g2 = vr.gate_pass;
+        document.getElementById('g2-badge').textContent = g2 ? 'PASS' : (g2 === false ? 'FAIL' : 'N/A');
+        document.getElementById('g2-badge').className = 'badge ' + (g2 ? 'bg-success' : 'bg-danger');
+        const valBadge = document.getElementById('g2-verdict-badge');
+        valBadge.textContent = vr.verdict || 'N/A';
+        valBadge.className = 'badge fs-5 px-3 py-2 ' + valColor(vr.verdict);
+        document.getElementById('g2-details').innerHTML = (vr.details || []).map(d => `<div class="mb-1">${d}</div>`).join('');
+        const pe = f.pe ? f.pe.toFixed(1) : 'N/A';
+        const pb = f.pb ? f.pb.toFixed(2) : 'N/A';
+        const roe = f.roe ? f.roe.toFixed(1) + '%' : 'N/A';
+        const roce = f.roce ? f.roce.toFixed(1) + '%' : 'N/A';
+        document.getElementById('g2-key-metrics').innerHTML = `P/E: ${pe} | P/B: ${pb} | ROE: ${roe} | ROCE: ${roce}`;
+
+        // Gate 3: Technical
+        const g3 = cl.gate_pass;
+        document.getElementById('g3-badge').textContent = g3 ? 'PASS' : 'FAIL';
+        document.getElementById('g3-badge').className = 'badge ' + (g3 ? 'bg-success' : 'bg-danger');
+        document.getElementById('g3-score').textContent = `${cl.score || 0}/7`;
+        document.getElementById('g3-score').className = 'score-circle ' + (g3 ? 'score-pass' : 'score-fail');
+        const g3cl = cl.checklist || {};
+        document.getElementById('g3-checklist').innerHTML = Object.entries(g3cl).map(([k, item]) => {
+            const icon = item.pass ? '<i class="bi bi-check-circle-fill text-success"></i>'
+                       : '<i class="bi bi-x-circle-fill text-danger"></i>';
+            return `<div class="d-flex gap-2 mb-1">${icon} <small>${item.detail}</small></div>`;
+        }).join('');
+        const macd = r.macd || {};
+        document.getElementById('g3-price-data').innerHTML =
+            `52W: ${sr['52w_low']}-${sr['52w_high']} | RSI: ${r.rsi} | MACD: ${macd.bullish ? 'Bullish' : 'Bearish'}<br>` +
+            `50-DMA: ${ma.ma_50} ${ma.above_50_dma ? '(Above)' : '(Below)'} | 200-DMA: ${ma.ma_200 || 'N/A'}`;
+
+        // Red Flags
+        const rfBody = document.getElementById('red-flags-body');
+        if (rf.flags && rf.flags.length > 0) {
+            rfBody.innerHTML = rf.flags.map(f => `<div class="text-danger mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>${f}</div>`).join('');
+            if (rf.critical) rfBody.innerHTML += '<div class="mt-2 fw-bold text-danger">CRITICAL - Instant Disqualifier</div>';
+        } else {
+            rfBody.innerHTML = '<div class="text-success"><i class="bi bi-shield-check me-2"></i>No red flags detected</div>';
+        }
+
+        // Trade Setup
+        const ts = v.trade_setup;
+        const tsBody = document.getElementById('trade-setup-body');
+        if (ts) {
+            tsBody.innerHTML = `
+                <table class="table table-dark table-sm mb-0">
+                    <tr><td>Entry</td><td class="text-end fw-bold">₹${ts.entry?.toFixed(2)}</td></tr>
+                    <tr><td>Stoploss</td><td class="text-end text-danger">₹${ts.stoploss?.toFixed(2)}</td></tr>
+                    <tr><td>Target 1 (40%)</td><td class="text-end text-success">₹${ts.target_1?.toFixed(2)}</td></tr>
+                    <tr><td>Target 2 (40%)</td><td class="text-end text-success">₹${ts.target_2?.toFixed(2)}</td></tr>
+                    <tr><td>Target 3 (Trail)</td><td class="text-end text-success">₹${ts.target_3?.toFixed(2)}</td></tr>
+                    <tr><td>Position Size</td><td class="text-end">${ts.position_pct}% of portfolio</td></tr>
+                </table>`;
+        } else {
+            tsBody.innerHTML = '<div class="text-muted">No trade setup - conditions not met</div>';
+        }
+
+        // Action
+        document.getElementById('action-text').textContent = v.action || '';
+    }
+
+    // Auto-analyze if symbol in URL
+    if (input.value.trim()) {
+        form.dispatchEvent(new Event('submit'));
+    }
+});
+</script>
+{% endblock %}
