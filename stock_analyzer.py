@@ -1190,16 +1190,23 @@ class ZerodhaAnalyzer:
         checklist['1_candlestick'] = {'pass': has_pattern, 'detail': ', '.join(patterns)}
         if has_pattern: score += 1
 
-        # 2. Prior Trend
+        # 2. Prior Trend (only meaningful if a pattern was detected)
         prior_trend = analysis['candlestick']['prior_trend']
-        bullish_p = ['Hammer', 'Bullish Engulfing', 'Bullish Marubozu', 'Morning Star']
-        bearish_p = ['Bearish Engulfing', 'Bearish Marubozu', 'Evening Star']
-        trend_valid = True
-        if any(p in str(patterns) for p in bullish_p):
-            trend_valid = prior_trend == 'Downtrend'
-        elif any(p in str(patterns) for p in bearish_p):
-            trend_valid = prior_trend == 'Uptrend'
-        checklist['2_prior_trend'] = {'pass': trend_valid, 'detail': f"Prior trend: {prior_trend}"}
+        if not has_pattern:
+            # No pattern → trend alignment is meaningless
+            trend_valid = False
+            trend_detail = "No pattern to validate"
+        else:
+            bullish_p = ['Hammer', 'Bullish Engulfing', 'Bullish Marubozu',
+                         'Morning Star', 'Inverted Hammer']
+            bearish_p = ['Bearish Engulfing', 'Bearish Marubozu', 'Evening Star']
+            trend_valid = True  # Default for neutral patterns (Doji)
+            if any(p in str(patterns) for p in bullish_p):
+                trend_valid = prior_trend == 'Downtrend'
+            elif any(p in str(patterns) for p in bearish_p):
+                trend_valid = prior_trend == 'Uptrend'
+            trend_detail = f"Prior trend: {prior_trend}"
+        checklist['2_prior_trend'] = {'pass': trend_valid, 'detail': trend_detail}
         if trend_valid: score += 1
 
         # 3. S&R within 4%
@@ -1220,12 +1227,12 @@ class ZerodhaAnalyzer:
         checklist['5_rrr'] = {'pass': rrr['valid'], 'detail': f"RRR: {rrr['rrr']}:1 (need >=1.5:1)"}
         if rrr['valid']: score += 1
 
-        # 6. Indicator Confirmation
+        # 6. Indicator Confirmation (MACD must confirm direction + RSI not overbought)
         rsi = analysis['rsi']
         macd = analysis['macd']
-        rsi_ok = 30 <= rsi <= 70
         macd_ok = macd['bullish']
-        indicators_ok = rsi_ok or macd_ok
+        rsi_not_overbought = rsi < 70
+        indicators_ok = macd_ok and rsi_not_overbought
         rsi_status = "Oversold" if rsi < 30 else "Overbought" if rsi > 70 else "Neutral"
         checklist['6_indicators'] = {
             'pass': indicators_ok,
